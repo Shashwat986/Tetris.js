@@ -22,7 +22,7 @@ define(function (require, exports, module) {
 	var Tetrimino = require('tetrimino');
 
 
-	 // A factory of pseudo-randomly generated Tetriminos.
+	 // A factory of non-randomly generated Tetriminos.
 	 //
 	 // See the Tetris Wiki for the [algorithm][].
 	 // [algorithm]: http://tetris.wikia.com/wiki/Random_Generator
@@ -30,7 +30,6 @@ define(function (require, exports, module) {
 	 // Attributes
 	 // ----------
 	 // - `queue` (Array): The current output queue of Tetriminos
-	 // - `pool` (Array): A pool of Tetriminos to refill the queue
 	 // - `bounds` (Array -> Boolean): The bounds function for all Tetriminos
 	 //   created by this factory. See `src/tetrimino.js` for details
 
@@ -38,7 +37,6 @@ define(function (require, exports, module) {
 
 		attributes: {
 			queue: [],
-			pool: [],
 			bounds: function () { return true; }
 		},
 
@@ -46,7 +44,6 @@ define(function (require, exports, module) {
 		initialize: function () {
 			this.set({
 				queue: this._makeQueue(),
-				pool: this._makeQueue()
 			});
 		},
 
@@ -57,14 +54,11 @@ define(function (require, exports, module) {
 
 		pop: function () {
 			var queue = this.get('queue');
-			var pool = this.get('pool');
 			var ret = queue.pop();
-			var replacement = pool.pop();
 
-			queue.unshift(replacement);
-			if (pool.length === 0) {
-				pool = this._makeQueue();
-				this.set('pool', pool);
+			if (queue.length === 0) {
+				queue = this._makeQueue();
+				this.set('queue', queue);
 			}
 			return ret;
 		},
@@ -80,17 +74,13 @@ define(function (require, exports, module) {
 			var chooseFrom = [];
 			var bag = [];
 			var tetrimino;
-			var randomIndex;
 			for (var TypeName in Tetrimino.types) {
 				tetrimino = new Tetrimino({type: TypeName, bounds: bounds});
 				chooseFrom.push(tetrimino);
 			}
-			while (chooseFrom.length > 0) {
-				randomIndex = Math.floor(Math.random() * chooseFrom.length);
-				bag.push(chooseFrom.splice(randomIndex, 1)[0]);
-			}
-			return bag;
-		}
 
+			bag = [chooseFrom[Math.floor(Math.random() * chooseFrom.length)]]
+			return bag
+		}
 	});
 });
